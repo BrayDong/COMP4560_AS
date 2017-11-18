@@ -24,3 +24,12 @@ Z:\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\as
 Z:\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.csproj.CoreCompileInputs.cache
 Z:\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.exe
 Z:\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.pdb
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\bin\Debug\asgn5v1.exe
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\bin\Debug\asgn5v1.pdb
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.csprojResolveAssemblyReference.cache
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.AboutDialogBox.resources
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.Transformer.resources
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.csproj.GenerateResource.Cache
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.csproj.CoreCompileInputs.cache
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.exe
+C:\Users\shawnk\Documents\COMP4560_AS\asgn5_DongwonKim_BraydenTraas\asgn5student\obj\Debug\asgn5v1.pdb

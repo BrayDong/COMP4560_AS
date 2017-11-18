@@ -313,6 +313,7 @@ namespace asgn5v1
             this.ClientSize = new System.Drawing.Size(508, 306);
             this.Controls.Add(this.toolBar1);
             this.Name = "Transformer";
+            this.Text = "7";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.Transformer_Load);
             this.ResumeLayout(false);
@@ -343,21 +344,22 @@ namespace asgn5v1
 			int k;
 
             if (gooddata){
-                double maxY = 0, minY = 0;
+                double height = grfx.ClipBounds.Height;
+                double width = grfx.ClipBounds.Width;
+                double screenCenterY = height / 2;
+                double screenCenterX = width / 2;
 
-                var height = grfx.ClipBounds.Height;
-                var width = grfx.ClipBounds.Width;
+                double minY = 0, maxY = 0;
 
-                var screenCenterY = height / 2;
-                var screenCenterX = width / 2;
-
-
-                for (int row = 0; row < numpts; row++) {
-                    if(vertices[row, 1] < minY) {
+                for (int row = 0; row < numpts; row++)
+                {
+                    if (vertices[row, 1] < minY)
+                    {
                         minY = vertices[row, 1];
                     }
 
-                    if (vertices[row, 1] > maxY) {
+                    if (vertices[row, 1] > maxY)
+                    {
                         maxY = vertices[row, 1];
                     }
                 }
@@ -365,29 +367,79 @@ namespace asgn5v1
                 double sFx = height / (maxY - minY) / 2;
                 double sFy = height / (maxY - minY) / 2;
                 double sFz = height / (maxY - minY) / 2;
-                double tFx;
-                double tFy;
-                double tFz;
-                
-                tFx = screenCenterX + (double)vertices[0, 0];
-                tFy = screenCenterY - (double)vertices[0, 0];
-                tFz = (double)vertices[0, 0];
-                //create the screen coordinates:
-                ctrans = new double[,] {
-                            { sFx, 0, 0, 0 },
-                            { 0, -sFy, 0, 0 },
-                            { 0, 0, sFz, 0 },
-                            { tFx, tFy, tFz, 1}
+
+                double[,] t1 = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -vertices[0,0], -vertices[0,1], -vertices[0,2], 1}
                 };
 
-                for( int x =0;  x < 4; x++) {
-                    for (int y = 0; y < 4; y++)
-                    {
-                        Console.Write(ctrans[x,y]+" ");
-                    }
-                    Console.WriteLine();
-                }
+                double[,] s1 = new double[,] {
+                            { sFx, 0, 0, 0 },
+                            { 0, sFy, 0, 0 },
+                            { 0, 0, sFz, 0 },
+                            { 0, 0, 0, 1}
+                };
 
+
+                double[,] t2 = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { screenCenterX, screenCenterY, 0, 1}
+                };
+
+                double[,] tnet = multMatrics(t1, s1);
+                tnet = multMatrics(tnet, t2);
+
+                ctrans = tnet;
+
+                //    double maxY = 0, minY = 0;
+
+                //    var height = grfx.ClipBounds.Height;
+                //    var width = grfx.ClipBounds.Width;
+
+                //    var screenCenterY = height / 2;
+                //    var screenCenterX = width / 2;
+
+
+                //    for (int row = 0; row < numpts; row++) {
+                //        if(vertices[row, 1] < minY) {
+                //            minY = vertices[row, 1];
+                //        }
+
+                //        if (vertices[row, 1] > maxY) {
+                //            maxY = vertices[row, 1];
+                //        }
+                //    }
+
+                //    double sFx = height / (maxY - minY) / 2;
+                //    double sFy = height / (maxY - minY) / 2;
+                //    double sFz = height / (maxY - minY) / 2;
+                //    double tFx;
+                //    double tFy;
+                //    double tFz;
+
+                //    tFx = screenCenterX + (double)vertices[0, 0];
+                //    tFy = screenCenterY - (double)vertices[0, 0];
+                //    tFz = (double)vertices[0, 0];
+                //    //create the screen coordinates:
+                //    ctrans = new double[,] {
+                //                { sFx, 0, 0, 0 },
+                //                { 0, -sFy, 0, 0 },
+                //                { 0, 0, sFz, 0 },
+                //                { tFx, tFy, tFz, 1}
+                //    };
+
+                //    for( int x =0;  x < 4; x++) {
+                //        for (int y = 0; y < 4; y++)
+                //        {
+                //            Console.Write(ctrans[x,y]+" ");
+                //        }
+                //        Console.WriteLine();
+                //    }
+                //}
 
 
                 // scrnpts = vertices*ctrans
@@ -404,32 +456,6 @@ namespace asgn5v1
 
                     }
                 }
-
-                //int maxY = 0, minY = 0;
-
-                //for (int i = 0; i < numlines; i++){
-                //    if(minY > (int)scrnpts[lines[i, 0], 1])
-                //    {
-                //        minY = (int)scrnpts[lines[i, 0], 1];
-                //    }
-
-                //    if(maxY < (int)scrnpts[lines[i, 0], 1])
-                //    {
-                //        maxY = (int)scrnpts[lines[i, 0], 1];
-                //    }
-                //}
-
-                //float scalarFactor = height/(maxY - minY) / 2;
-
-
-                //Console.WriteLine("scalarFactor: " + scalarFactor);
-                ////now draw the lines
-
-                //float xRelativeDistance = screenCenterX - (int)scrnpts[lines[0, 0], 0] * scalarFactor;
-
-                //float yRelativeDistance = screenCenterY + (int)scrnpts[lines[0, 0], 1] * scalarFactor;
-
-               // float scalarFactor = height / (maxY - minY) / 2;
 
                 for (int i = 0; i < numlines; i++)
                 {
@@ -650,7 +676,30 @@ namespace asgn5v1
 				Close();
 			}
 
-		}
+		} // end of button event handler
+
+        public double[,] multMatrics(double[,] a, double[,] b)
+        {
+            double[,] result = new double[a.GetLength(0),b.GetLength(0)];
+            double temp;
+
+            for (int row = 0; row < 4; row++)
+            {
+                for (int col = 0; col < 4; col++)
+                {
+                    temp = 0.0d;
+
+                    for (int k = 0; k < 4; k++)
+                        temp += vertices[row, k] * ctrans[k, col];
+
+                    result[row, col] = temp;
+
+                }
+            }
+
+            return result;
+        }
+
 
 		
 	}
