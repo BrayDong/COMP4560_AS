@@ -50,6 +50,8 @@ namespace asgn5v1
 		private System.Windows.Forms.ToolBarButton exitbtn;
 		int[,] lines;
 
+        bool runFirst;
+
 		public Transformer()
 		{
 			//
@@ -63,7 +65,7 @@ namespace asgn5v1
 			this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 			this.SetStyle(ControlStyles.UserPaint, true);
 			this.SetStyle(ControlStyles.DoubleBuffer, true);
-			Text = "COMP 4560:  Assignment 5 (200830) (Your Name Here)";
+			Text = "COMP 4560:  Assignment 5 (200830) (Shawn Kim / Brayden Traas)";
 			ResizeRedraw = true;
 			BackColor = Color.Black;
 			MenuItem miNewDat = new MenuItem("New &Data...",
@@ -331,34 +333,121 @@ namespace asgn5v1
 		protected override void OnPaint(PaintEventArgs pea)
 		{
 			Graphics grfx = pea.Graphics;
-         Pen pen = new Pen(Color.White, 3);
+
+
+
+            //Console.WriteLine($"height:{height} width:{width}");
+
+            Pen pen = new Pen(Color.White, 3);
 			double temp;
 			int k;
 
-            if (gooddata)
-            {
-                //create the screen coordinates:
-                // scrnpts = vertices*ctrans
+            if (gooddata){
+                double maxY = 0, minY = 0;
 
+                var height = grfx.ClipBounds.Height;
+                var width = grfx.ClipBounds.Width;
+
+                var screenCenterY = height / 2;
+                var screenCenterX = width / 2;
+
+
+                for (int row = 0; row < numpts; row++) {
+                    if(vertices[row, 1] < minY) {
+                        minY = vertices[row, 1];
+                    }
+
+                    if (vertices[row, 1] > maxY) {
+                        maxY = vertices[row, 1];
+                    }
+                }
+
+                double sFx = height / (maxY - minY) / 2;
+                double sFy = height / (maxY - minY) / 2;
+                double sFz = height / (maxY - minY) / 2;
+                double tFx;
+                double tFy;
+                double tFz;
+                
+                tFx = screenCenterX + (double)vertices[0, 0];
+                tFy = screenCenterY - (double)vertices[0, 0];
+                tFz = (double)vertices[0, 0];
+                //create the screen coordinates:
+                ctrans = new double[,] {
+                            { sFx, 0, 0, 0 },
+                            { 0, -sFy, 0, 0 },
+                            { 0, 0, sFz, 0 },
+                            { tFx, tFy, tFz, 1}
+                };
+
+                for( int x =0;  x < 4; x++) {
+                    for (int y = 0; y < 4; y++)
+                    {
+                        Console.Write(ctrans[x,y]+" ");
+                    }
+                    Console.WriteLine();
+                }
+
+
+
+                // scrnpts = vertices*ctrans
                 for (int i = 0; i < numpts; i++)
                 {
                     for (int j = 0; j < 4; j++)
                     {
                         temp = 0.0d;
+
                         for (k = 0; k < 4; k++)
                             temp += vertices[i, k] * ctrans[k, j];
+
                         scrnpts[i, j] = temp;
+
                     }
                 }
 
-                //now draw the lines
+                //int maxY = 0, minY = 0;
+
+                //for (int i = 0; i < numlines; i++){
+                //    if(minY > (int)scrnpts[lines[i, 0], 1])
+                //    {
+                //        minY = (int)scrnpts[lines[i, 0], 1];
+                //    }
+
+                //    if(maxY < (int)scrnpts[lines[i, 0], 1])
+                //    {
+                //        maxY = (int)scrnpts[lines[i, 0], 1];
+                //    }
+                //}
+
+                //float scalarFactor = height/(maxY - minY) / 2;
+
+
+                //Console.WriteLine("scalarFactor: " + scalarFactor);
+                ////now draw the lines
+
+                //float xRelativeDistance = screenCenterX - (int)scrnpts[lines[0, 0], 0] * scalarFactor;
+
+                //float yRelativeDistance = screenCenterY + (int)scrnpts[lines[0, 0], 1] * scalarFactor;
+
+               // float scalarFactor = height / (maxY - minY) / 2;
 
                 for (int i = 0; i < numlines; i++)
                 {
-                    grfx.DrawLine(pen, (int)scrnpts[lines[i, 0], 0], (int)scrnpts[lines[i, 0], 1],
-                        (int)scrnpts[lines[i, 1], 0], (int)scrnpts[lines[i, 1], 1]);
-                }
+                    var x1 = (int)scrnpts[lines[i, 0], 0];
+                    var y1 = (int)scrnpts[lines[i, 0], 1];
+                    var x2 = (int)scrnpts[lines[i, 1], 0];
+                    var y2 = (int)scrnpts[lines[i, 1], 1];
 
+
+                    if (i==0)
+                    {
+                        Console.WriteLine(x1);
+                        Console.WriteLine(y1);
+                    }
+
+                    grfx.DrawLine(pen, x1, y1, x2, y2);
+                }
+                runFirst = false;
 
             } // end of gooddata block	
 		} // end of OnPaint
@@ -367,7 +456,8 @@ namespace asgn5v1
 		{
 			//MessageBox.Show("New Data item clicked.");
 			gooddata = GetNewData();
-			RestoreInitialImage();			
+            runFirst = true;
+            RestoreInitialImage();			
 		}
 
 		void MenuFileExitOnClick(object obj, EventArgs ea)
