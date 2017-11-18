@@ -377,11 +377,10 @@ namespace asgn5v1
 
                 double[,] s1 = new double[,] {
                             { sFx, 0, 0, 0 },
-                            { 0, sFy, 0, 0 },
+                            { 0, -sFy, 0, 0 },
                             { 0, 0, sFz, 0 },
                             { 0, 0, 0, 1}
                 };
-
 
                 double[,] t2 = new double[,] {
                             { 1, 0, 0, 0 },
@@ -690,7 +689,7 @@ namespace asgn5v1
                     temp = 0.0d;
 
                     for (int k = 0; k < 4; k++)
-                        temp += vertices[row, k] * ctrans[k, col];
+                        temp += a[row, k] * b[k, col];
 
                     result[row, col] = temp;
 
