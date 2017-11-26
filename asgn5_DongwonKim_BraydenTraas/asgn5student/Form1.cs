@@ -349,55 +349,7 @@ namespace asgn5v1
 			int k;
 
             if (gooddata){
-                double height = grfx.ClipBounds.Height;
-                double width = grfx.ClipBounds.Width;
-                double screenCenterY = height / 2;
-                double screenCenterX = width / 2;
 
-                double minY = 0, maxY = 0;
-
-                for (int row = 0; row < numpts; row++)
-                {
-                    if (vertices[row, 1] < minY)
-                    {
-                        minY = vertices[row, 1];
-                    }
-
-                    if (vertices[row, 1] > maxY)
-                    {
-                        maxY = vertices[row, 1];
-                    }
-                }
-
-                double sFx = height / (maxY - minY) / 2;
-                double sFy = height / (maxY - minY) / 2;
-                double sFz = height / (maxY - minY) / 2;
-
-                double[,] t1 = new double[,] {
-                            { 1, 0, 0, 0 },
-                            { 0, 1, 0, 0 },
-                            { 0, 0, 1, 0 },
-                            { -vertices[0,0], -vertices[0,1], -vertices[0,2], 1}
-                };
-
-                double[,] s1 = new double[,] {
-                            { sFx, 0, 0, 0 },
-                            { 0, -sFy, 0, 0 },
-                            { 0, 0, sFz, 0 },
-                            { 0, 0, 0, 1}
-                };
-
-                double[,] t2 = new double[,] {
-                            { 1, 0, 0, 0 },
-                            { 0, 1, 0, 0 },
-                            { 0, 0, 1, 0 },
-                            { screenCenterX, screenCenterY, 0, 1}
-                };
-
-                double[,] tnet = multMatrics(t1, s1);
-                tnet = multMatrics(tnet, t2);
-
-                ctrans = multMatrics(tnet, tempTnet);
 
                 // scrnpts = vertices*ctrans
                 for (int i = 0; i < numpts; i++)
@@ -423,7 +375,6 @@ namespace asgn5v1
                     
                     grfx.DrawLine(pen, x1, y1, x2, y2);
                 }
-                runFirst = false;
 
             } // end of gooddata block	
 		} // end of OnPaint
@@ -499,7 +450,58 @@ namespace asgn5v1
 			}
 			scrnpts = new double[numpts,4];
 			setIdentity(ctrans,4,4);  //initialize transformation matrix to identity
-			return true;
+
+            double height = this.Height;
+            double width = this.Width;
+            double screenCenterY = height / 2;
+            double screenCenterX = width / 2;
+
+            double minY = 0, maxY = 0;
+
+            for (int row = 0; row < numpts; row++)
+            {
+                if (vertices[row, 1] < minY)
+                {
+                    minY = vertices[row, 1];
+                }
+
+                if (vertices[row, 1] > maxY)
+                {
+                    maxY = vertices[row, 1];
+                }
+            }
+
+            double sFx = height / (maxY - minY) / 2;
+            double sFy = height / (maxY - minY) / 2;
+            double sFz = height / (maxY - minY) / 2;
+
+            double[,] t1 = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -vertices[0,0], -vertices[0,1], -vertices[0,2], 1}
+                };
+
+            double[,] s1 = new double[,] {
+                            { sFx, 0, 0, 0 },
+                            { 0, -sFy, 0, 0 },
+                            { 0, 0, sFz, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+            double[,] t2 = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { screenCenterX, screenCenterY, 0, 1}
+                };
+
+            double[,] tnet = multMatrics(t1, s1);
+            tnet = multMatrics(tnet, t2);
+
+            ctrans = tnet;
+
+            return true;
 		} // end of GetNewData
 
 		void DecodeCoords(ArrayList coorddata)
@@ -565,7 +567,9 @@ namespace asgn5v1
                             { -75, 0, 0, 1}
                 };
 
-				Refresh();
+                ctrans = multMatrics(ctrans, tempTnet);
+
+                Refresh();
 			}
 
 			if (e.Button == transrightbtn) 
@@ -578,6 +582,8 @@ namespace asgn5v1
                             { 0, 0, 1, 0 },
                             { 75, 0, 0, 1}
                 };
+
+                ctrans = multMatrics(ctrans, tempTnet);
 
                 Refresh();
 			}
@@ -593,6 +599,8 @@ namespace asgn5v1
                             { 0, -75, 0, 1}
                 };
 
+                ctrans = multMatrics(ctrans, tempTnet);
+
                 Refresh();
 			}
 			
@@ -607,6 +615,8 @@ namespace asgn5v1
                             { 0, 75, 0, 1}
                 };
 
+                ctrans = multMatrics(ctrans, tempTnet);
+
                 Refresh();
 			}
 
@@ -614,11 +624,16 @@ namespace asgn5v1
             {
 
                 Console.WriteLine("Scale up");
+
+                double x = scrnpts[0, 0];
+                double y = scrnpts[0, 1];
+                double z = scrnpts[0, 2];
+
                 double[,] trans = new double[,] {
                             { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
                             { 0, 0, 1, 0 },
-                            { 0, 0, 0, 1}
+                            { -x, -y, -z, 1}
                 };
 
                 double[,] scale = new double[,] {
@@ -632,24 +647,30 @@ namespace asgn5v1
                             { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
                             { 0, 0, 1, 0 },
-                            { 0, 0, 0, 1}
+                            { x, y, z, 1}
                 };
                 
                 tempTnet = multMatrics(trans, scale);
                 tempTnet = multMatrics(tempTnet, transback);
 
+                ctrans = multMatrics(ctrans, tempTnet);
                 Refresh();
 			}
 
             if (e.Button == scaledownbtn)
             {
-                Console.WriteLine("Scale down");
 
+                double x = scrnpts[0, 0];
+                double y = scrnpts[0, 1];
+                double z = scrnpts[0, 2];
+
+                Console.WriteLine("Scale down");
+                
                 double[,] trans = new double[,] {
                             { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
                             { 0, 0, 1, 0 },
-                            { 0, 0, 0, 1}
+                            { -x, -y, -z, 1}
                 };
 
                 double[,] scale = new double[,] {
@@ -663,12 +684,13 @@ namespace asgn5v1
                             { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
                             { 0, 0, 1, 0 },
-                            { 0, 0, 0, 1}
+                            { x, y, z, 1}
                 };
 
                 tempTnet = multMatrics(trans, scale);
                 tempTnet = multMatrics(tempTnet, transback);
 
+                ctrans = multMatrics(ctrans, tempTnet);
                 Refresh();
             }
 
@@ -676,13 +698,36 @@ namespace asgn5v1
 			{
                 Console.WriteLine("rotate by x");
 
-                tempTnet = new double[,] {
+                double x = scrnpts[0, 0];
+                double y = scrnpts[0, 1];
+                double z = scrnpts[0, 2];
+
+                double[,] trans = new double[,] {
                             { 1, 0, 0, 0 },
-                            { 0, 0.1, -0.05, 0 },
-                            { 0, 0.05, 0.1, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+                
+                double [,] rot = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, Math.Cos(0.52), Math.Sin(0.52), 0 },
+                            { 0, -Math.Sin(0.52), Math.Cos(0.52), 0 },
                             { 0, 0, 0, 1}
                 };
 
+                double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+
+
+                tempTnet = multMatrics(trans, rot);
+                tempTnet = multMatrics(tempTnet, transback);
+
+                ctrans = multMatrics(ctrans, tempTnet);
                 Refresh();
             }
 
@@ -690,13 +735,37 @@ namespace asgn5v1
 			{
                 Console.WriteLine("rotate by y");
 
-                tempTnet = new double[,] {
-                            { 0.1, 0, 0.05, 0 },
+                double x = scrnpts[0, 0];
+                double y = scrnpts[0, 1];
+                double z = scrnpts[0, 2];
+
+                double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
-                            { -0.05, 0, 0.1, 0 },
+                            { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+
+
+                double[,] rot = new double[,] {
+                            { Math.Cos(0.52), 0, Math.Sin(0.52), 0 },
+                            { 0, 1, 0, 0 },
+                            { -Math.Sin(0.52), 0, Math.Cos(0.52), 0 },
                             { 0, 0, 0, 1}
                 };
 
+                double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+
+
+                tempTnet = multMatrics(trans, rot);
+                tempTnet = multMatrics(tempTnet, transback);
+
+                ctrans = multMatrics(ctrans, tempTnet);
                 Refresh();
             }
 
@@ -704,16 +773,39 @@ namespace asgn5v1
 			{
                 Console.WriteLine("rotate by z");
 
-                tempTnet = new double[,] {
-                            { 0.1, -0.05, 0, 0 },
-                            { 0.05, 0.1, 0, 0 },
+                double x = scrnpts[0, 0];
+                double y = scrnpts[0, 1];
+                double z = scrnpts[0, 2];
+
+                double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
                             { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+
+
+                double[,] rot = new double[,] {
+                            { Math.Cos(0.52), Math.Sin(0.52), 0, 0 },
+                            { -Math.Sin(0.52), Math.Cos(0.52), 0, 0 },
+                            {0,  0, 1, 0 },
                             { 0, 0, 0, 1}
                 };
 
-                Refresh();
+                double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+                tempTnet = multMatrics(trans, rot);
+                tempTnet = multMatrics(tempTnet, transback);
+
+                ctrans = multMatrics(ctrans, tempTnet);
+                Refresh(); Refresh();
             }
 
+            // continuous
 			if (e.Button == rotxbtn) 
 			{
 				
