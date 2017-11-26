@@ -25,7 +25,14 @@ namespace asgn5v1
 		double[,] vertices;
 		double[,] scrnpts;
 		double[,] ctrans = new double[4,4];  //your main transformation matrix
-		private System.Windows.Forms.ImageList tbimages;
+        double[,] tempTnet = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+        private System.Windows.Forms.ImageList tbimages;
 		private System.Windows.Forms.ToolBar toolBar1;
 		private System.Windows.Forms.ToolBarButton transleftbtn;
 		private System.Windows.Forms.ToolBarButton transrightbtn;
@@ -70,7 +77,7 @@ namespace asgn5v1
 			BackColor = Color.Black;
 			MenuItem miNewDat = new MenuItem("New &Data...",
 				new EventHandler(MenuNewDataOnClick));
-			MenuItem miExit = new MenuItem("E&xit", 
+			MenuItem miExit = new MenuItem("&Exit", 
 				new EventHandler(MenuFileExitOnClick));
 			MenuItem miDash = new MenuItem("-");
 			MenuItem miFile = new MenuItem("&File",
@@ -335,8 +342,6 @@ namespace asgn5v1
 		{
 			Graphics grfx = pea.Graphics;
 
-
-
             //Console.WriteLine($"height:{height} width:{width}");
 
             Pen pen = new Pen(Color.White, 3);
@@ -392,54 +397,7 @@ namespace asgn5v1
                 double[,] tnet = multMatrics(t1, s1);
                 tnet = multMatrics(tnet, t2);
 
-                ctrans = tnet;
-
-                //    double maxY = 0, minY = 0;
-
-                //    var height = grfx.ClipBounds.Height;
-                //    var width = grfx.ClipBounds.Width;
-
-                //    var screenCenterY = height / 2;
-                //    var screenCenterX = width / 2;
-
-
-                //    for (int row = 0; row < numpts; row++) {
-                //        if(vertices[row, 1] < minY) {
-                //            minY = vertices[row, 1];
-                //        }
-
-                //        if (vertices[row, 1] > maxY) {
-                //            maxY = vertices[row, 1];
-                //        }
-                //    }
-
-                //    double sFx = height / (maxY - minY) / 2;
-                //    double sFy = height / (maxY - minY) / 2;
-                //    double sFz = height / (maxY - minY) / 2;
-                //    double tFx;
-                //    double tFy;
-                //    double tFz;
-
-                //    tFx = screenCenterX + (double)vertices[0, 0];
-                //    tFy = screenCenterY - (double)vertices[0, 0];
-                //    tFz = (double)vertices[0, 0];
-                //    //create the screen coordinates:
-                //    ctrans = new double[,] {
-                //                { sFx, 0, 0, 0 },
-                //                { 0, -sFy, 0, 0 },
-                //                { 0, 0, sFz, 0 },
-                //                { tFx, tFy, tFz, 1}
-                //    };
-
-                //    for( int x =0;  x < 4; x++) {
-                //        for (int y = 0; y < 4; y++)
-                //        {
-                //            Console.Write(ctrans[x,y]+" ");
-                //        }
-                //        Console.WriteLine();
-                //    }
-                //}
-
+                ctrans = multMatrics(tnet, tempTnet);
 
                 // scrnpts = vertices*ctrans
                 for (int i = 0; i < numpts; i++)
@@ -462,14 +420,7 @@ namespace asgn5v1
                     var y1 = (int)scrnpts[lines[i, 0], 1];
                     var x2 = (int)scrnpts[lines[i, 1], 0];
                     var y2 = (int)scrnpts[lines[i, 1], 1];
-
-
-                    if (i==0)
-                    {
-                        Console.WriteLine(x1);
-                        Console.WriteLine(y1);
-                    }
-
+                    
                     grfx.DrawLine(pen, x1, y1, x2, y2);
                 }
                 runFirst = false;
@@ -605,41 +556,163 @@ namespace asgn5v1
 		{
 			if (e.Button == transleftbtn)
 			{
+                Console.WriteLine("Left called");
+
+                tempTnet = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -75, 0, 0, 1}
+                };
+
 				Refresh();
 			}
+
 			if (e.Button == transrightbtn) 
 			{
-				Refresh();
+                Console.WriteLine("Right called");
+
+                tempTnet = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 75, 0, 0, 1}
+                };
+
+                Refresh();
 			}
 			if (e.Button == transupbtn)
 			{
-				Refresh();
+
+                Console.WriteLine("Up called");
+
+                tempTnet = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, -75, 0, 1}
+                };
+
+                Refresh();
 			}
 			
 			if(e.Button == transdownbtn)
 			{
-				Refresh();
+                Console.WriteLine("down called");
+
+                tempTnet = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, 75, 0, 1}
+                };
+
+                Refresh();
 			}
-			if (e.Button == scaleupbtn) 
+
+            if (e.Button == scaleupbtn)
+            {
+
+                Console.WriteLine("Scale up");
+                double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                double[,] scale = new double[,] {
+                            { 1.1, 0, 0, 0 },
+                            { 0, 1.1, 0, 0 },
+                            { 0, 0, 1.1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, 0, 0, 1}
+                };
+                
+                tempTnet = multMatrics(trans, scale);
+                tempTnet = multMatrics(tempTnet, transback);
+
+                Refresh();
+			}
+
+            if (e.Button == scaledownbtn)
+            {
+                Console.WriteLine("Scale down");
+
+                double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                double[,] scale = new double[,] {
+                            { 0.9, 0, 0, 0 },
+                            { 0, 0.9, 0, 0 },
+                            { 0, 0, 0.9, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                tempTnet = multMatrics(trans, scale);
+                tempTnet = multMatrics(tempTnet, transback);
+
+                Refresh();
+            }
+
+            if (e.Button == rotxby1btn) 
 			{
-				Refresh();
-			}
-			if (e.Button == scaledownbtn) 
-			{
-				Refresh();
-			}
-			if (e.Button == rotxby1btn) 
-			{
-				
-			}
+                Console.WriteLine("rotate by x");
+
+                tempTnet = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 0.1, -0.05, 0 },
+                            { 0, 0.05, 0.1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                Refresh();
+            }
+
 			if (e.Button == rotyby1btn) 
 			{
-				
-			}
+                Console.WriteLine("rotate by y");
+
+                tempTnet = new double[,] {
+                            { 0.1, 0, 0.05, 0 },
+                            { 0, 1, 0, 0 },
+                            { -0.05, 0, 0.1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                Refresh();
+            }
+
 			if (e.Button == rotzby1btn) 
 			{
-				
-			}
+                Console.WriteLine("rotate by z");
+
+                tempTnet = new double[,] {
+                            { 0.1, -0.05, 0, 0 },
+                            { 0.05, 0.1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+                Refresh();
+            }
 
 			if (e.Button == rotxbtn) 
 			{
