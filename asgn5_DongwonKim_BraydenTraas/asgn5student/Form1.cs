@@ -822,12 +822,75 @@ namespace asgn5v1
 
 			if(e.Button == shearleftbtn)
 			{
-				Refresh();
+                Console.WriteLine("shear left");
+
+                double x = scrnpts[0, 0];
+                double y = scrnpts[0, 1];
+                double z = scrnpts[0, 2];
+
+                double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+
+
+                double[,] transform = new double[,] {
+                            { 1,    0, 1, 0 },
+                            { 0.2,  1, 0, 0 },
+                            { 0,    0, 1, 0 },
+                            { 0,    0, 0, 1 }
+                };
+
+                double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+                tempTnet = multMatrics(trans, transform);
+                tempTnet = multMatrics(tempTnet, transback);
+
+                ctrans = multMatrics(ctrans, tempTnet);
+
+                Refresh();
 			}
 
 			if (e.Button == shearrightbtn) 
 			{
-				Refresh();
+                Console.WriteLine("shear right");
+
+                double x = scrnpts[0, 0];
+                double y = scrnpts[0, 1];
+                double z = scrnpts[0, 2];
+
+                double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+
+
+                double[,] transform = new double[,] {
+                            { 1,    0,      1, 0 },
+                            { -0.2, 1,      0, 0 },
+                            { 0,    0,      1, 0 },
+                            { 0,    0,      0, 1 }
+                };
+
+                double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+                tempTnet = multMatrics(trans, transform);
+                tempTnet = multMatrics(tempTnet, transback);
+
+                ctrans = multMatrics(ctrans, tempTnet);
+                Refresh();
 			}
 
 			if (e.Button == resetbtn)
