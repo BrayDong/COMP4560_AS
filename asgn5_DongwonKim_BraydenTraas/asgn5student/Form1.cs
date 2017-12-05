@@ -950,8 +950,7 @@ namespace asgn5v1
                 Console.WriteLine("shear left");
 
                 ClearTimers();
-
-
+                
                 double x = scrnpts[lowestPoint, 0];
                 double y = scrnpts[lowestPoint, 1];
                 double z = scrnpts[lowestPoint, 2];
@@ -965,7 +964,7 @@ namespace asgn5v1
 
 
                 double[,] transform = new double[,] {
-                            { 1,    0, 1, 0 },
+                            { 1,    0, 0, 0 },
                             { 0.1,  1, 0, 0 },
                             { 0,    0, 1, 0 },
                             { 0,    0, 0, 1 }
@@ -1005,7 +1004,7 @@ namespace asgn5v1
 
 
                 double[,] transform = new double[,] {
-                            { 1,    0,      1, 0 },
+                            { 1,    0,      0, 0 },
                             { -0.1, 1,      0, 0 },
                             { 0,    0,      1, 0 },
                             { 0,    0,      0, 1 }
