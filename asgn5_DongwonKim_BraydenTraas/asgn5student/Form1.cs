@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Data;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace asgn5v1
 {
@@ -15,9 +16,13 @@ namespace asgn5v1
 	public class Transformer : System.Windows.Forms.Form
 	{
 		private System.ComponentModel.IContainer components;
-		//private bool GetNewData();
+        //private bool GetNewData();
 
-		// basic data for Transformer
+        // basic data for Transformer
+
+        System.Windows.Forms.Timer xTimer;
+        System.Windows.Forms.Timer yTimer;
+        System.Windows.Forms.Timer zTimer;
 
 		int numpts = 0;
 		int numlines = 0;
@@ -401,9 +406,35 @@ namespace asgn5v1
 		void RestoreInitialImage()
 		{
 			Invalidate();
+
+            ClearTimers();
+           
+            SetData();
 		} // end of RestoreInitialImage
 
-		bool GetNewData()
+        void ClearTimers()
+        {
+            if (xTimer != null)
+            {
+                xTimer.Stop();
+                xTimer = null;
+            }
+
+            if (yTimer != null)
+            {
+                yTimer.Stop();
+                yTimer = null;
+            }
+
+            if (zTimer != null)
+            {
+                zTimer.Stop();
+                zTimer = null;
+            }
+
+        }
+
+        bool GetNewData()
 		{
 			string strinputfile,text;
 			ArrayList coorddata = new ArrayList();
@@ -448,8 +479,19 @@ namespace asgn5v1
 				MessageBox.Show("***Failed to Open Line Data File***");
 				return false;
 			}
-			scrnpts = new double[numpts,4];
-			setIdentity(ctrans,4,4);  //initialize transformation matrix to identity
+
+
+            return SetData();
+
+		} // end of GetNewData
+
+
+        bool SetData()
+        {
+            ClearTimers();
+
+            scrnpts = new double[numpts, 4];
+            setIdentity(ctrans, 4, 4);  //initialize transformation matrix to identity
 
             double height = this.Height;
             double width = this.Width;
@@ -502,7 +544,8 @@ namespace asgn5v1
             ctrans = tnet;
 
             return true;
-		} // end of GetNewData
+        }
+
 
 		void DecodeCoords(ArrayList coorddata)
 		{
@@ -556,9 +599,30 @@ namespace asgn5v1
 
 		private void toolBar1_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
 		{
-			if (e.Button == transleftbtn)
+            // initial setup (find lowest point)
+
+            if(scrnpts == null)
+            {
+                return;
+            }
+
+            var lowestPoint = 0;
+
+            for (int i = 0; i < numpts; i++)
+            {
+                Console.WriteLine($"checking point ({i}): {scrnpts[i, 1]} > {scrnpts[lowestPoint, 1]}");
+                if (scrnpts[i, 1] > scrnpts[lowestPoint, 1])
+                {
+                    lowestPoint = i;
+                }
+
+            }
+
+            if (e.Button == transleftbtn)
 			{
                 Console.WriteLine("Left called");
+
+                ClearTimers();
 
                 tempTnet = new double[,] {
                             { 1, 0, 0, 0 },
@@ -576,6 +640,8 @@ namespace asgn5v1
 			{
                 Console.WriteLine("Right called");
 
+                ClearTimers();
+
                 tempTnet = new double[,] {
                             { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
@@ -589,8 +655,10 @@ namespace asgn5v1
 			}
 			if (e.Button == transupbtn)
 			{
-
+            
                 Console.WriteLine("Up called");
+
+                ClearTimers();
 
                 tempTnet = new double[,] {
                             { 1, 0, 0, 0 },
@@ -608,6 +676,8 @@ namespace asgn5v1
 			{
                 Console.WriteLine("down called");
 
+                ClearTimers();
+
                 tempTnet = new double[,] {
                             { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
@@ -624,6 +694,8 @@ namespace asgn5v1
             {
 
                 Console.WriteLine("Scale up");
+
+                ClearTimers();
 
                 double x = scrnpts[0, 0];
                 double y = scrnpts[0, 1];
@@ -665,7 +737,9 @@ namespace asgn5v1
                 double z = scrnpts[0, 2];
 
                 Console.WriteLine("Scale down");
-                
+
+                ClearTimers();
+
                 double[,] trans = new double[,] {
                             { 1, 0, 0, 0 },
                             { 0, 1, 0, 0 },
@@ -697,6 +771,8 @@ namespace asgn5v1
             if (e.Button == rotxby1btn) 
 			{
                 Console.WriteLine("rotate by x");
+
+                ClearTimers();
 
                 double x = scrnpts[0, 0];
                 double y = scrnpts[0, 1];
@@ -734,6 +810,9 @@ namespace asgn5v1
 			if (e.Button == rotyby1btn) 
 			{
                 Console.WriteLine("rotate by y");
+
+                ClearTimers();
+
 
                 double x = scrnpts[0, 0];
                 double y = scrnpts[0, 1];
@@ -773,6 +852,9 @@ namespace asgn5v1
 			{
                 Console.WriteLine("rotate by z");
 
+                ClearTimers();
+
+
                 double x = scrnpts[0, 0];
                 double y = scrnpts[0, 1];
                 double z = scrnpts[0, 2];
@@ -808,25 +890,71 @@ namespace asgn5v1
             // continuous
 			if (e.Button == rotxbtn) 
 			{
-				
-			}
+                Console.WriteLine("rotate by x");
+
+                if(xTimer != null)
+                {
+                    ClearTimers();
+                    return;
+                }
+
+                ClearTimers();
+
+                xTimer = new System.Windows.Forms.Timer();
+                xTimer.Tick += new EventHandler(rotateX);
+                xTimer.Interval = 10; // in miliseconds
+                xTimer.Start();
+                
+            }
 			if (e.Button == rotybtn) 
 			{
-				
-			}
+                Console.WriteLine("rotate by y");
+
+                if (yTimer != null)
+                {
+                    ClearTimers();
+                    return;
+                }
+
+                ClearTimers();
+
+
+
+                yTimer = new System.Windows.Forms.Timer();
+                yTimer.Tick += new EventHandler(rotateY);
+                yTimer.Interval = 10; // in miliseconds
+                yTimer.Start();
+            }
 			
 			if (e.Button == rotzbtn) 
 			{
-				
-			}
+                Console.WriteLine("rotate by z");
+
+                if (zTimer != null)
+                {
+                    ClearTimers();
+                    return;
+                }
+
+                ClearTimers();
+
+                zTimer = new System.Windows.Forms.Timer();
+                zTimer.Tick += new EventHandler(rotateZ);
+                zTimer.Interval = 10; // in miliseconds
+                zTimer.Start();
+
+            }
 
 			if(e.Button == shearleftbtn)
 			{
                 Console.WriteLine("shear left");
 
-                double x = scrnpts[0, 0];
-                double y = scrnpts[0, 1];
-                double z = scrnpts[0, 2];
+                ClearTimers();
+
+
+                double x = scrnpts[lowestPoint, 0];
+                double y = scrnpts[lowestPoint, 1];
+                double z = scrnpts[lowestPoint, 2];
 
                 double[,] trans = new double[,] {
                             { 1, 0, 0, 0 },
@@ -838,7 +966,7 @@ namespace asgn5v1
 
                 double[,] transform = new double[,] {
                             { 1,    0, 1, 0 },
-                            { 0.2,  1, 0, 0 },
+                            { 0.1,  1, 0, 0 },
                             { 0,    0, 1, 0 },
                             { 0,    0, 0, 1 }
                 };
@@ -861,9 +989,12 @@ namespace asgn5v1
 			{
                 Console.WriteLine("shear right");
 
-                double x = scrnpts[0, 0];
-                double y = scrnpts[0, 1];
-                double z = scrnpts[0, 2];
+                ClearTimers();
+
+
+                double x = scrnpts[lowestPoint, 0];
+                double y = scrnpts[lowestPoint, 1];
+                double z = scrnpts[lowestPoint, 2];
 
                 double[,] trans = new double[,] {
                             { 1, 0, 0, 0 },
@@ -875,7 +1006,7 @@ namespace asgn5v1
 
                 double[,] transform = new double[,] {
                             { 1,    0,      1, 0 },
-                            { -0.2, 1,      0, 0 },
+                            { -0.1, 1,      0, 0 },
                             { 0,    0,      1, 0 },
                             { 0,    0,      0, 1 }
                 };
@@ -895,12 +1026,14 @@ namespace asgn5v1
 
 			if (e.Button == resetbtn)
 			{
-				RestoreInitialImage();
+                ClearTimers();
+                RestoreInitialImage();
 			}
 
 			if(e.Button == exitbtn) 
 			{
-				Close();
+                ClearTimers();
+                Close();
 			}
 
 		} // end of button event handler
@@ -927,9 +1060,120 @@ namespace asgn5v1
             return result;
         }
 
+        void rotateX(object sender, EventArgs e)
+        {
+            var val = 0.05;
 
-		
-	}
+            double x = scrnpts[0, 0];
+            double y = scrnpts[0, 1];
+            double z = scrnpts[0, 2];
+
+            double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+
+            double[,] rot = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, Math.Cos(val), Math.Sin(val), 0 },
+                            { 0, -Math.Sin(val), Math.Cos(val), 0 },
+                            { 0, 0, 0, 1}
+                };
+
+            double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+
+
+            tempTnet = multMatrics(trans, rot);
+            tempTnet = multMatrics(tempTnet, transback);
+
+            ctrans = multMatrics(ctrans, tempTnet);
+            Refresh();
+        }
+
+        void rotateY(object sender, EventArgs e)
+        {
+            var val = 0.05;
+
+            double x = scrnpts[0, 0];
+            double y = scrnpts[0, 1];
+            double z = scrnpts[0, 2];
+
+            double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+
+            double[,] rot = new double[,] {
+                            { Math.Cos(val), 0, Math.Sin(val), 0 },
+                            { 0, 1, 0, 0 },
+                            { -Math.Sin(val), 0, Math.Cos(val), 0 },
+                            { 0, 0, 0, 1}
+                };
+
+            double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+
+
+            tempTnet = multMatrics(trans, rot);
+            tempTnet = multMatrics(tempTnet, transback);
+
+            ctrans = multMatrics(ctrans, tempTnet);
+            Refresh();
+        }
+
+        void rotateZ(object sender, EventArgs e)
+        {
+            var val = 0.05;
+
+            double x = scrnpts[0, 0];
+            double y = scrnpts[0, 1];
+            double z = scrnpts[0, 2];
+
+            double[,] trans = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { -x, -y, -z, 1}
+                };
+
+            double[,] rot = new double[,] {
+                            { Math.Cos(val), Math.Sin(val), 0, 0 },
+                            { -Math.Sin(val), Math.Cos(val), 0, 0 },
+                            {0,  0, 1, 0 },
+                            { 0, 0, 0, 1}
+                };
+
+            double[,] transback = new double[,] {
+                            { 1, 0, 0, 0 },
+                            { 0, 1, 0, 0 },
+                            { 0, 0, 1, 0 },
+                            { x, y, z, 1}
+                };
+
+
+            tempTnet = multMatrics(trans, rot);
+            tempTnet = multMatrics(tempTnet, transback);
+
+            ctrans = multMatrics(ctrans, tempTnet);
+            Refresh();
+        }
+
+
+
+    }
 
 	
 }
